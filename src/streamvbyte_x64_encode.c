@@ -60,12 +60,12 @@ static size_t streamvbyte_encode_SSE41 (const uint32_t* in, uint32_t count, uint
 	for (const uint32_t* end = &in[(count & ~7U)]; in != end; in += 8)
 	{
 		__m128i r0, r1, r2, r3;
-		size_t keys;
+		uint16_t keys;
 
 		r0 = _mm_loadu_si128((const __m128i*)&in[0]);
 		r1 = _mm_loadu_si128((const __m128i*)&in[4]);
 
-		keys = svb_control_SSE41(r0, r1);
+		keys = (uint16_t)svb_control_SSE41(r0, r1);
 
 		r2 = _mm_loadu_si128((const __m128i*)&shuf_lut[(keys << 4) & 0x03F0]);
 		r3 = _mm_loadu_si128((const __m128i*)&shuf_lut[(keys >> 4) & 0x03F0]);
@@ -77,7 +77,7 @@ static size_t streamvbyte_encode_SSE41 (const uint32_t* in, uint32_t count, uint
 		_mm_storeu_si128((__m128i *)dataPtr, r1);
 		dataPtr += len_lut[keys >> 8];
 
-		*((uint16_t*)keyPtr) = (uint16_t)keys;
+		memcpy(keyPtr, &keys, 2);
 		keyPtr += 2;
 	}
 
